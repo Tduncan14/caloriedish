@@ -30,6 +30,40 @@ const itemCtrl = (function(){
 
        logData: function(){
          return data
+       },
+
+       addItem:function(name,calories){
+        let ID;
+
+        //Create Id
+        if(data.items.length > 0){
+        ID = data.items[data.items.length -1].id + 1;
+
+        }
+        else{
+            ID = 0;
+        }
+
+        // calories to number
+        const caloriess = parseInt(calories);
+
+        // create new item
+
+        newItem = new Item(ID,name,caloriess);
+
+        // adds to item array
+        data.items.push(newItem);
+
+
+        // returns the new item
+
+        return newItem;
+
+
+
+        console.log('treek');
+        console.log(name);
+        console.log(calories);
        }
    }
 })();
@@ -68,17 +102,38 @@ const UIctrl = (function(){
         document.querySelector(UISelectors.itemList).innerHTML = html;
 
        },
-        getItemInput:function(e){
+        getItemInput:function(){
             return{
-                name:document.querySelector(UISelectors.itemNameInput.value),
-                calories:document.querySelector(UISelectors.itemCaloriesInput.value)
+                name:document.querySelector(UISelectors.itemNameInput).value,
+                calories:document.querySelector(UISelectors.itemCaloriesInput).value
             }
 
         }
        ,
+       addListItem:function(item){
+           // Create li element
+           const li = document.createElement('li');
+           // add class
+           li.className = 'collection-item';
+           //  add Id 
+           li.id =`item-${item.id}`
+           // add.html
+           li.innerHTML =`<strong>${item.name}:</strong><em>${item.calories}</em>
+           <a href="#" class="secondary-content"><i class="far fa-edit fa fa-pencil"></i></a>`
+
+           // insert item
+           document.querySelector(UISelectors.itemList).insertAdjacentElement('beforeend',li);
+
+       },
        getSelectors:function(){
         return UISelectors;
-    }
+    },
+
+      clearInput:function(){
+          document.querySelector(UISelectors.itemNameInput).value = '';
+          document.querySelector(UISelectors.itemCaloriesInput).value = '';
+
+      }
     }
     
 
@@ -110,8 +165,30 @@ const loadEventListeners =function(){
 
   const itemAddSubmit = function(e){
 
+    
+
     // Get form input from UI controller
     const input = UIctrl.getItemInput();
+
+
+
+     // check for name and calorie input
+    if(input.name  !=='' && input.calories !== ''){
+         // add item
+        const newItem = itemCtrl.addItem(input.name,input.calories);
+
+
+        // add Item to ui list
+        UIctrl.addListItem(newItem);
+
+      // Clear fields
+      UIctrl.clearInput();
+
+     
+     }
+
+
+     console.log(input);
 
       e.preventDefault();
 

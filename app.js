@@ -36,6 +36,14 @@ const itemCtrl = (function(){
          return data
        },
 
+       setCurrentItem:function(item){
+         data.currentItem = item;
+       },
+
+       getCurrentItem:function(){
+          return data.currentItem;
+       },
+
        getTotalCalories: function(){
            let total = 0;
 
@@ -76,12 +84,27 @@ const itemCtrl = (function(){
         // returns the new item
 
         return newItem;
+        
 
 
 
         console.log('treek');
         console.log(name);
         console.log(calories);
+       },
+       getItemById:function(id){
+        let found = null;
+
+        // loop through items
+       
+        data.items.forEach(function(item){
+          if(item.id  === id){
+
+            found = item;
+          }
+        })
+        return found
+
        }
    }
 })();
@@ -98,6 +121,9 @@ const UIctrl = (function(){
     const UISelectors={
         itemList:'#item-list',
         addBtn:'.add-btn',
+        updateBtn:'.update-btn',
+        deleteBtn:'.delete-btn',
+        backBtn:'.back-btn',
         itemNameInput:'#item-name',
         itemCaloriesInput:'#item-calories',
         totalCalories:'.total-calories'
@@ -139,7 +165,7 @@ const UIctrl = (function(){
            li.id =`item-${item.id}`
            // add.html
            li.innerHTML =`<strong>${item.name}:</strong><em>${item.calories}</em>
-           <a href="#" class="secondary-content"><i class="far fa-edit fa fa-pencil"></i></a>`
+           <a href="#" class="secondary-content"><i class="far fa-edit fa fa-pencil edit-item"></i></a>`
 
            // insert item
            document.querySelector(UISelectors.itemList).insertAdjacentElement('beforeend',li);
@@ -158,12 +184,28 @@ const UIctrl = (function(){
           document.querySelector(UISelectors.itemCaloriesInput).value = '';
 
       },
+        addItemToForm:function(){
+          document.querySelector(UISelectors.itemNameInput).value =  itemCtrl.getCurrentItem().name;
+          document.querySelector(UISelectors.itemCaloriesInput).value = itemCtrl.getCurrentItem().calories;
+        },
+
+
+
 
        showTotalCalories:function(totalCalories){
 
     document.querySelector(UISelectors.totalCalories).textContent = totalCalories;
 
-       }
+       },
+
+     
+      clearEditState:function(){
+        UIctrl.clearInput();
+        document.querySelector(UISelectors.updateBtn).style.display='none';
+        document.querySelector(UISelectors.deleteBtn).style.display='none';
+        document.querySelector(UISelectors.backBtn).style.display='none';
+        document.querySelector(UISelectors.addBtn).style.inline ='inline';
+      }
     }
     
 
@@ -188,6 +230,8 @@ const loadEventListeners =function(){
    // Add Item event
    document.querySelector(UISelectors.addBtn).addEventListener('click', itemAddSubmit);
 
+   //Edit icon click event
+   document.querySelector(UISelectors.itemList).addEventListener('click',ItemUpdateSubmit)
 }
 
 
@@ -224,6 +268,7 @@ const loadEventListeners =function(){
      
      }
 
+  
 
      console.log(input);
 
@@ -233,12 +278,48 @@ const loadEventListeners =function(){
       console.log('add');
   }
 
+
+     // update item submit
+     const ItemUpdateSubmit = function(e){
+
+        if(e.target.classList.contains('edit-item')){
+          // Get list item id
+          const listId = e.target.parentNode.parentNode.id;
+          console.log(listId);
+
+         //break into an array
+         const listIdArr = listId.split('-')
+
+
+         const id = parseInt(listIdArr[1]);
+
+         //Get Item
+
+         const itemToEdit = itemCtrl.getItemById(id);
+
+          console.log(itemToEdit);
+          // set to current item
+          itemCtrl.setCurrentItem(itemToEdit);
+
+          // add item to forms
+
+          UIctrl.addItemToForm();
+        }
+        e.preventDefault();
+
+    }
+
     // console.log(itemCtrl.logData())
 
 
   //Public method
     return{
-        init:function(){
+        init:function(){ 
+             // Clear edit state
+             UIctrl.clearEditState();
+
+
+
             console.log("Starting app");
 
             //fetches the items form the data structure
